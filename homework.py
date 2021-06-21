@@ -1,65 +1,47 @@
-...
+import os
+import time
+import requests
+import telegram
+from dotenv import load_dotenv
+
 
 load_dotenv()
 
 
-PRACTICUM_TOKEN = ...
-TELEGRAM_TOKEN = ...
-TELEGRAM_CHAT_ID = ...
-
-RETRY_PERIOD = 600
-ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
-HEADERS = {'Authorization': f'OAuth {PRACTICUM_TOKEN}'}
+PRAKTIKUM_TOKEN = os.getenv('PRAKTIKUM_TOKEN')
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 
-HOMEWORK_VERDICTS = {
-    'approved': 'Работа проверена: ревьюеру всё понравилось. Ура!',
-    'reviewing': 'Работа взята на проверку ревьюером.',
-    'rejected': 'Работа проверена: у ревьюера есть замечания.'
-}
+def parse_homework_status(homework):
+    homework_name = ...
+    if ...
+        verdict = 'К сожалению, в работе нашлись ошибки.'
+    else:
+        verdict = 'Ревьюеру всё понравилось, работа зачтена!'
+    return f'У вас проверили работу "{homework_name}"!\n\n{verdict}'
 
 
-def check_tokens():
-    ...
+def get_homeworks(current_timestamp):
+    homework_statuses = ...
+    return homework_statuses.json()
 
 
-def send_message(bot, message):
-    ...
-
-
-def get_api_answer(timestamp):
-    ...
-
-
-def check_response(response):
-    ...
-
-
-def parse_status(homework):
-    ...
-
-    return f'Изменился статус проверки работы "{homework_name}". {verdict}'
+def send_message(message):
+    return bot.send_message(...)
 
 
 def main():
-    """Основная логика работы бота."""
-
-    ...
-
-    bot = telegram.Bot(token=TELEGRAM_TOKEN)
-    timestamp = int(time.time())
-
-    ...
+    current_timestamp = int(time.time())  # Начальное значение timestamp
 
     while True:
         try:
-
             ...
+            time.sleep(5 * 60)  # Опрашивать раз в пять минут
 
-        except Exception as error:
-            message = f'Сбой в работе программы: {error}'
-            ...
-        ...
+        except Exception as e:
+            print(f'Бот упал с ошибкой: {e}')
+            time.sleep(5)
 
 
 if __name__ == '__main__':
