@@ -93,12 +93,14 @@ def check_response(response: dict):
 def parse_status(homework):
     """Извлекает статус домашней работы."""
     homework_name = homework.get('homework_name')
-    if 'homework_name' not in homework:
+    missed_keys_name = {'homework_name'} - homework.keys()
+    if missed_keys_name:
         raise logging.warning('Отсутствует имя домашней работы.')
         homework_name = 'NO_NAME'
     logger.debug(f'Проверяем: {homework_name}')
     homework_status = homework.get('status')
-    if 'status' not in homework:
+    missed_keys_status = {'status'} - homework.keys()
+    if missed_keys_status:
         raise logger.error(f'Отсутствует ключ: {homework_status}')
     logger.debug(f'Текущий статус: {homework_status}')
     verdict = HOMEWORK_VERDICTS.get(homework_status)
