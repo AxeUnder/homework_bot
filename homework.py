@@ -14,9 +14,9 @@ from http import HTTPStatus
 
 load_dotenv()
 
-PRACTICUM_TOKEN = os.getenv('OAUTH')
-TELEGRAM_TOKEN = os.getenv('TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('ID')
+PRACTICUM_TOKEN = os.getenv('PRACTICUM_TOKEN')
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 
 RETRY_PERIOD = 600
 ENDPOINT = 'https://practicum.yandex.ru/api/user_api/homework_statuses/'
@@ -39,16 +39,13 @@ logger.setLevel(logging.DEBUG)
 
 def check_tokens():
     """Проверяет доступность переменных окружения."""
-    env_var = [PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID]
-    if not all(env_var):
-        logger.critical('Требуемые переменные среды отсутствуют:', ...)
-    else:
-        return True
+    return all((PRACTICUM_TOKEN, TELEGRAM_CHAT_ID, TELEGRAM_TOKEN))
 
 
 def send_message(bot, message):
     """Отправляет сообщение в Telegram чат."""
     try:
+        logger.debug('Начало отправки сообщения.')
         bot.send_message(TELEGRAM_CHAT_ID, message)
         logger.debug('Сообщение успешно отправлено! {}'.format(message))
     except Exception as error:
@@ -58,6 +55,7 @@ def send_message(bot, message):
 def get_api_answer(timestamp):
     """Функция делает запрос к эндпоинту API."""
     try:
+        logger.debug(f'Начало запроса к API {ENDPOINT}.')
         homework_statuses = requests.get(
             ENDPOINT,
             headers=HEADERS,
@@ -69,7 +67,7 @@ def get_api_answer(timestamp):
                     homework_statuses.status_code
                 )
             )
-        logger.debug('Ответ получен')
+        logger.debug('Ответ получен: {}'.format(homework_statuses))
     except requests.exceptions.HTTPError as error:
         raise logger.error('Недоступность эндпоинта: {}'.format(error))
     except requests.RequestException as error:
@@ -81,14 +79,14 @@ def get_api_answer(timestamp):
 
 def check_response(response: dict):
     """Проверяет ответ API на соответствие ключей."""
-    if 'homeworks' not in response:
-        raise logger.error(
-            'Отсутствие ожидаемых ключей в ответе: {}'.format(KeyError)
-        )
+    logger.debug('Начало проверки ответа сервера.')
     if not isinstance(response, dict):
         raise logger.error('Некорректный тип ответа: {}'.format(TypeError))
-    if not isinstance(response['homeworks'], list):
+    if not isinstance(response.get('homeworks'), list):
         raise logger.error('Некорректный тип ответа: {}'.format(TypeError))
+    missed_keys = {'homeworks', 'current_date'} - response.keys()
+    if missed_keys:
+        raise logger.error(f'В ответе API нет ожидаемых ключей: {missed_keys}')
     return response['homeworks']
 
 
@@ -117,8 +115,8 @@ def main():
         'error': None,
     }
     if not check_tokens():
-        logging.critical()
-        exit()
+        logger.critical('Отсутствует обязательная переменная окружения')
+        sys.exit('Отсутствует обязательная переменная окружения')
     bot = telegram.Bot(token=TELEGRAM_TOKEN)
     timestamp = int(time.time())
     while True:
