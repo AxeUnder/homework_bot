@@ -96,7 +96,6 @@ def parse_status(homework):
     missed_keys_name = {'homework_name'} - homework.keys()
     if missed_keys_name:
         raise logging.warning('Отсутствует имя домашней работы.')
-        homework_name = 'NO_NAME'
     logger.debug(f'Проверяем: {homework_name}')
     homework_status = homework.get('status')
     missed_keys_status = {'status'} - homework.keys()
