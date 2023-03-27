@@ -68,10 +68,11 @@ def get_api_answer(timestamp):
                 )
             )
         logger.debug('Ответ получен: {}'.format(homework_statuses))
-    except requests.exceptions.HTTPError as error:
-        raise logger.error('Недоступность эндпоинта: {}'.format(error))
     except requests.RequestException as error:
-        raise logger.error('Недоступность ответ: {}'.format(error))
+        raise logger.error('Недоступность эндпоинта: {}'.format(error),
+                           f'timestamp = {timestamp}',
+                           f'HEADERS = {HEADERS}'
+                           )
     except Exception as error:
         raise logger.error('Был полочен неожиданный ответ: {}'.format(error))
     return homework_statuses.json()
