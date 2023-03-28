@@ -59,7 +59,7 @@ def get_api_answer(timestamp):
         homework_statuses = requests.get(
             ENDPOINT,
             headers=HEADERS,
-            params={'from_data': timestamp}
+            params={'from_date': timestamp}
         )
         if homework_statuses.status_code != HTTPStatus.OK:
             raise logger.error(
@@ -75,6 +75,7 @@ def get_api_answer(timestamp):
                            )
     except Exception as error:
         raise logger.error('Был полочен неожиданный ответ: {}'.format(error))
+
     return homework_statuses.json()
 
 
@@ -126,7 +127,7 @@ def main():
             response = get_api_answer(timestamp)
             homeworks = check_response(response)
             if len(homeworks) == 0:
-                logging.debug('Ответ API пуст: нет домашних работ.')
+                logging.info('Ответ API пуст: нет домашних работ.')
             for homework in homeworks:
                 message = parse_status(homework)
                 if last_send.get(homework['homework_name']) != message:
